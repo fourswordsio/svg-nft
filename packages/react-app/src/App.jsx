@@ -67,28 +67,16 @@ const getFromIPFS = async hashToGet => {
 
 // 🛰 providers
 if (DEBUG) console.log("📡 Connecting to Mainnet Ethereum");
-// const mainnetProvider = getDefaultProvider("mainnet", { infura: INFURA_ID, etherscan: ETHERSCAN_KEY, quorum: 1 });
-// const mainnetProvider = new InfuraProvider("mainnet",INFURA_ID);
 //
-// attempt to connect to our own scaffold eth rpc and if that fails fall back to infura...
-// Using StaticJsonRpcProvider as the chainId won't change see https://github.com/ethers-io/ethers.js/issues/901
-const scaffoldEthProvider = new StaticJsonRpcProvider("https://rinkeby.infura.io/v3/8568aa65b4e84a9fa53f3a468b67ef21");
-const mainnetInfura = new StaticJsonRpcProvider("https://rinkeby.infura.io/v3/8568aa65b4e84a9fa53f3a468b67ef21");
-// ( ⚠️ Getting "failed to meet quorum" errors? Check your INFURA_I
-
-// 🏠 Your local provider is usually pointed at your local blockchain
+const scaffoldEthProvider = new StaticJsonRpcProvider("https://speedy-nodes-nyc.moralis.io/d0553b4370fc344989d16e94/eth/rinkeby/");
+const mainnetInfura = new StaticJsonRpcProvider("https://speedy-nodes-nyc.moralis.io/d0553b4370fc344989d16e94/eth/rinkeby/");
 const localProviderUrl = targetNetwork.rpcUrl;
-// as you deploy to other networks you can set REACT_APP_PROVIDER=https://dai.poa.network in packages/react-app/.env
 const localProviderUrlFromEnv = process.env.REACT_APP_PROVIDER ? process.env.REACT_APP_PROVIDER : localProviderUrl;
 if (DEBUG) console.log("🏠 Connecting to provider:", localProviderUrlFromEnv);
 const localProvider = new StaticJsonRpcProvider(localProviderUrlFromEnv);
-
-// 🔭 block explorer URL
 const blockExplorer = targetNetwork.blockExplorer;
-
 const { TextArea } = Input;
 const { Paragraph } = Typography;
-
 const web3Modal = new Web3Modal({
   // network: "mainnet", // optional
   cacheProvider: true, // optional
@@ -149,10 +137,23 @@ function App(props) {
   // If you want to make 🔐 write transactions to your contracts, use the userProvider:
   const writeContracts = useContractLoader(userProvider);
 
+    const mainnetDAIContract = useExternalContractLoader(mainnetProvider, DAI_ADDRESS, DAI_ABI);
+
   // EXTERNAL CONTRACT EXAMPLE:
   //
   // If you want to bring in the mainnet DAI contract it would look like:
   const isSigner = injectedProvider && injectedProvider.getSigner && injectedProvider.getSigner()._isSigner;
+
+
+    // If you want to call a function on a new block
+    useOnBlock(mainnetProvider, () => {
+        console.log(`⛓ A new mainnet block is here: ${mainnetProvider._lastBlockNumber}`);
+    });
+
+    // Then read your DAI balance like:
+    const myMainnetDAIBalance = useContractReader({ DAI: mainnetDAIContract }, "DAI", "balanceOf", [
+        "0x95b58a6bff3d14b7db2f5cb5f0ad413dc2940658",
+    ]);
 
   // If you want to call a function on a new block
   useOnBlock(mainnetProvider, () => {
@@ -179,191 +180,144 @@ function App(props) {
   const yourBalance = balance && balance.toNumber && balance.toNumber();
   const [yourCollectibles, setYourCollectibles] = useState();
 
-  useEffect(() => {
-    const updateYourCollectibles = async () => {
-      const collectibleUpdate = [];
-      for (let tokenIndex = 0; tokenIndex < balance; tokenIndex++) {
-        try {
-          console.log("GEtting token index", tokenIndex);
-          const tokenId = await readContracts.DogeClubSVG.tokenOfOwnerByIndex(address, tokenIndex);
-          console.log("tokenId", tokenId);
-          const tokenURI = await readContracts.DogeClubSVG.tokenURI(tokenId);
-          const jsonManifestString = atob(tokenURI.substring(29))
-          console.log("jsonManifestString", jsonManifestString);
-/*
-          const ipfsHash = tokenURI.replace("https://ipfs.io/ipfs/", "");
-          console.log("ipfsHash", ipfsHash);
+    useEffect(() => {
+        const updateYourCollectibles = async() => {
+            const collectibleUpdate = [];
+            for (let tokenIndex = 0; tokenIndex < balance; tokenIndex++) {
+                try {
+                    console.log("GEtting token index", tokenIndex);
+                    const tokenId = await readContracts.ABCNotationNFT.tokenOfOwnerByIndex(address, tokenIndex);
+                    console.log("tokenId", tokenId);
+                    const tokenURI = await readContracts.ABCNotationNFT.tokenURI(tokenId);
+                    console.log("tokenURI", tokenURI);
 
-          const jsonManifestBuffer = await getFromIPFS(ipfsHash);
+                    const notation = await readContracts.ABCNotationNFT.notation(tokenId);
+                    console.log("notation", notation);
 
-        */
-          try {
-            const jsonManifest = JSON.parse(jsonManifestString);
-            console.log("jsonManifest", jsonManifest);
-            collectibleUpdate.push({ id: tokenId, uri: tokenURI, owner: address, ...jsonManifest });
-          } catch (e) {
-            console.log(e);
-          }
+                    const ipfsHash = tokenURI.replace("https://ipfs.io/ipfs/", "");
+                    console.log("ipfsHash", ipfsHash);
+                    const jsonManifestBuffer = await getFromIPFS(ipfsHash);
 
-        } catch (e) {
-          console.log(e);
+                    try {
+                        const jsonManifest = JSON.parse(jsonManifestBuffer.toString());
+                        console.log("jsonManifest", jsonManifest);
+                        collectibleUpdate.push({ id: tokenId, notation: notation, index: tokenIndex, uri: tokenURI, owner: address, ...jsonManifest });
+                    } catch (e) {
+                        console.log(e);
+                    }
+
+                } catch (e) {
+                    console.log(e);
+                }
+            }
+            setYourCollectibles(collectibleUpdate);
+        };
+        updateYourCollectibles();
+    }, [address, yourBalance]);
+
+
+    //
+    // 🧫 DEBUG 👨🏻‍🔬
+    //
+    useEffect(() => {
+        if (
+            DEBUG &&
+            mainnetProvider &&
+            address &&
+            selectedChainId &&
+            yourLocalBalance &&
+            yourMainnetBalance &&
+            readContracts &&
+            writeContracts &&
+            mainnetDAIContract
+        ) {
+            console.log("_____________________________________ 🏗 scaffold-eth _____________________________________");
+            console.log("🌎 mainnetProvider", mainnetProvider);
+            console.log("🏠 localChainId", localChainId);
+            console.log("👩‍💼 selected address:", address);
+            console.log("🕵🏻‍♂️ selectedChainId:", selectedChainId);
+            console.log("💵 yourLocalBalance", yourLocalBalance ? formatEther(yourLocalBalance) : "...");
+            console.log("💵 yourMainnetBalance", yourMainnetBalance ? formatEther(yourMainnetBalance) : "...");
+            console.log("📝 readContracts", readContracts);
+            console.log("🌍 DAI contract on mainnet:", mainnetDAIContract);
+            console.log("🔐 writeContracts", writeContracts);
         }
-      }
-      setYourCollectibles(collectibleUpdate.reverse());
-    };
-    updateYourCollectibles();
-  }, [address, yourBalance]);
+    }, [
+        mainnetProvider,
+        address,
+        selectedChainId,
+        yourLocalBalance,
+        yourMainnetBalance,
+        readContracts,
+        writeContracts,
+        mainnetDAIContract,
+    ]);
 
-  /*
-  const addressFromENS = useResolveName(mainnetProvider, "austingriffith.eth");
-  console.log("🏷 Resolved austingriffith.eth as:",addressFromENS)
-  */
+    let networkDisplay = "";
+    const loadWeb3Modal = useCallback(async() => {
+        const provider = await web3Modal.connect();
+        setInjectedProvider(new Web3Provider(provider));
+    }, [setInjectedProvider]);
 
-  //
-  // 🧫 DEBUG 👨🏻‍🔬
-  //
-  useEffect(() => {
-    if (
-      DEBUG &&
-      mainnetProvider &&
-      address &&
-      selectedChainId &&
-      yourLocalBalance &&
-      yourMainnetBalance &&
-      readContracts &&
-      writeContracts
+    useEffect(() => {
+        if (web3Modal.cachedProvider) {
+            loadWeb3Modal();
+        }
+    }, [loadWeb3Modal]);
+
+    const [route, setRoute] = useState();
+    useEffect(() => {
+        setRoute(window.location.pathname);
+    }, [setRoute]);
+
+    let faucetHint = "";
+    const faucetAvailable = localProvider && localProvider.connection && targetNetwork.name === "localhost";
+
+    const [faucetClicked, setFaucetClicked] = useState(false);
+    if (!faucetClicked &&
+        localProvider &&
+        localProvider._network &&
+        localProvider._network.chainId === 31337 &&
+        yourLocalBalance &&
+        formatEther(yourLocalBalance) <= 0
     ) {
-      console.log("_____________________________________ 🏗 scaffold-eth _____________________________________");
-      console.log("🌎 mainnetProvider", mainnetProvider);
-      console.log("🏠 localChainId", localChainId);
-      console.log("👩‍💼 selected address:", address);
-      console.log("🕵🏻‍♂️ selectedChainId:", selectedChainId);
-      console.log("💵 yourLocalBalance", yourLocalBalance ? formatEther(yourLocalBalance) : "...");
-      console.log("💵 yourMainnetBalance", yourMainnetBalance ? formatEther(yourMainnetBalance) : "...");
-      console.log("📝 readContracts", readContracts);
-      console.log("🔐 writeContracts", writeContracts);
+        faucetHint = ( <
+            div style = {
+                { padding: 16 }
+            } >
+            <
+            Button type = "primary"
+            onClick = {
+                () => {
+                    faucetTx({
+                        to: address,
+                        value: parseEther("0.01"),
+                    });
+                    setFaucetClicked(true);
+                }
+            } > 💰Grab funds from the faucet⛽️ <
+            /Button> < /
+            div >
+        );
     }
-  }, [
-    mainnetProvider,
-    address,
-    selectedChainId,
-    yourLocalBalance,
-    yourMainnetBalance,
-    readContracts,
-    writeContracts,
-  ]);
 
-  let networkDisplay = "";
-  if (localChainId && selectedChainId && localChainId !== selectedChainId) {
-    const networkSelected = NETWORK(selectedChainId);
-    const networkLocal = NETWORK(localChainId);
-    if (selectedChainId === 1337 && localChainId === 31337) {
-      networkDisplay = (
-        <div style={{ zIndex: 2, position: "absolute", right: 0, top: 60, padding: 16 }}>
-          <Alert
-            message="⚠️ Wrong Network ID"
-            description={
-              <div>
-                You have <b>chain id 1337</b> for localhost and you need to change it to <b>31337</b> to work with
-                HardHat.
-                <div>(MetaMask -&gt; Settings -&gt; Networks -&gt; Chain ID -&gt; 31337)</div>
-              </div>
-            }
-            type="error"
-            closable={false}
-          />
-        </div>
-      );
-    } else {
-      networkDisplay = (
-        <div style={{ zIndex: 2, position: "absolute", right: 0, top: 60, padding: 16 }}>
-          <Alert
-            message="⚠️ Wrong Network"
-            description={
-              <div>
-                You have <b>{networkSelected && networkSelected.name}</b> selected and you need to be on{" "}
-                <b>{networkLocal && networkLocal.name}</b>.
-              </div>
-            }
-            type="error"
-            closable={false}
-          />
-        </div>
-      );
-    }
-  } else {
-    networkDisplay = (
-      <div style={{ zIndex: -1, position: "absolute", right: 154, top: 28, padding: 16, color: targetNetwork.color }}>
-        {targetNetwork.name}
-      </div>
-    );
-  }
+    ////====================  ////====================  ////====================  ////====================  ////====================
 
-  const loadWeb3Modal = useCallback(async () => {
-    const provider = await web3Modal.connect();
-    setInjectedProvider(new Web3Provider(provider));
-  }, [setInjectedProvider]);
 
-  useEffect(() => {
-    if (web3Modal.cachedProvider) {
-      loadWeb3Modal();
-    }
-  }, [loadWeb3Modal]);
 
-  const [route, setRoute] = useState();
-  useEffect(() => {
-    setRoute(window.location.pathname);
-  }, [setRoute]);
+ 
 
-  let faucetHint = "";
-  const faucetAvailable = localProvider && localProvider.connection && targetNetwork.name === "localhost";
-
-  const [faucetClicked, setFaucetClicked] = useState(false);
-  if (
-    !faucetClicked &&
-    localProvider &&
-    localProvider._network &&
-    localProvider._network.chainId === 31337 &&
-    yourLocalBalance &&
-    formatEther(yourLocalBalance) <= 0
-  ) {
-    faucetHint = (
-      <div style={{ padding: 16 }}>
-        <Button
-          type="primary"
-          onClick={() => {
-            faucetTx({
-              to: address,
-              value: parseEther("0.01"),
-            });
-            setFaucetClicked(true);
-          }}
-        >
-          💰 Grab funds from the faucet ⛽️
-        </Button>
-      </div>
-    );
-  }
-   const [pobaName, setPOBAname] = useState();
-        const [pobaDesc, setPOBAdesc] = useState();
-        const [extURL, setEXTurl] = useState();
-        const [animationUrl, setAnimationUrl] = useState();
-        const [youtubeUrl, setYoutubeUrl] = useState();
-const [uPOBAipfs, setPOBAipfs] = useState();
-const [sendThis, setSendingThis] = useState();
-    const [imgupload, setImgUpload] = useState();
-    const [IMGipfs, setIMGipfs] = useState();
-    const [yourJSON, setYourJSON] = useState(STARTING_JSON);
+ 
+  const [yourJSON, setYourJSON] = useState(STARTING_JSON);
   const [sending, setSending] = useState();
   const [ipfsHash, setIpfsHash] = useState();
   const [ipfsDownHash, setIpfsDownHash] = useState();
-
   const [downloading, setDownloading] = useState();
   const [ipfsContent, setIpfsContent] = useState();
-
   const [transferToAddresses, setTransferToAddresses] = useState({});
-
   const [loadedAssets, setLoadedAssets] = useState();
+
+
   /*useEffect(() => {
     const updateYourCollectibles = async () => {
       const assetUpdate = [];
@@ -386,225 +340,254 @@ const [sendThis, setSendingThis] = useState();
   }, [assets, readContracts, transferEvents]);*/
 
 
-const uPOBAupload = ( <
-        Upload name = "image"
-        listType = "picture-card"
-        className = "avatar-uploader"
-        showUploadList = { false }
-        customRequest = {
-            async a => {
-                console.log("CUSTOM REQUIEST", a);
-                setImgUpload(true);
-                const result = await ipfs.add(a.file);
-                console.log("UPLOADED", result);
-                setIMGipfs(result.path);
-                setImgUpload(false);
-            }
-        }
-        onChange = {
-            a => {
-                console.log("CHANGE", a);
-            }
-        } >  {
-            IMGipfs ? < img src = { "https://ipfs.io/ipfs/" + IMGipfs }
-            style = {
-                { maxWidth: 90, maxHeight: 90 }
-            }
-            /> : "image"}< /
-            Upload >
-        );
 
-        const POBAimageUpload = imgupload ? < Spin style = {
-            { margin: 32 }
-        }
-        /> : uPOBAupload;
+  ////====================  ////====================  ////====================  ////====================  ////====================
 
-     
-        const displayPOBAform = ( <
-            div style = {
-                { maxWidth: 320, margin: "auto", marginTop: 32, paddingBottom: 32 }
-            } >
-            <
-            Input Placeholder = "name"
-            onChange = {
-                e => {
-                    setPOBAname(e.target.value);
+
+
+    const [uploading, setUploading] = useState()
+    const [imageInIpfs, setImageInIpfs] = useState()
+
+    const uploadArea = ( <
+            Upload name = "image"
+            listType = "picture-card"
+            className = "avatar-uploader"
+            showUploadList = { false }
+            customRequest = {
+                async(a) => {
+                    console.log("CUSTOM REQUIEST", a)
+                    setUploading(true)
+                    const result = await ipfs.add(a.file);
+                    console.log("UPLOADED", result)
+                    setImageInIpfs(result.path)
+                    setUploading(false)
                 }
-            }
-            value = { pobaName }
-            style = {
-                { marginTop: 16 }
-            }
-            /> <
-            TextArea Placeholder = "description"
-            rows = { 4 }
-            style = {
-                { marginTop: 16 }
             }
             onChange = {
-                e => {
-                    setPOBAdesc(e.target.value);
+                (a) => { console.log("CHANGE", a) }
+            } > {
+                imageInIpfs ? < img src = { "https://ipfs.io/ipfs/" + imageInIpfs }
+                style = {
+                    { maxWidth: 90, maxHeight: 90 }
                 }
+                /> : "image"} < /
+                Upload >
+            )
+
+            const imageUploadAndDisplay = uploading ? < Spin style = {
+                { margin: 32 }
             }
-            value = { pobaDesc }
-            /> <
-            Input Placeholder = "external url"
-            onChange = {
-                e => {
-                    setEXTurl(e.target.value);
+            /> : uploadArea
+
+            const [nftName, setNFTName] = useState();
+            const [nftDesc, setNFTDesc] = useState();
+            const [nftUrl, setNFTUrl] = useState();
+            const [animationUrl, setAnimationUrl] = useState();
+            const [youtubeUrl, setYoutubeUrl] = useState();
+
+            const textFormDisplay = ( <
+                div style = {
+                    { maxWidth: 320, margin: "auto", marginTop: 32, paddingBottom: 32 }
+                } >
+                <
+                Input placeholder = "name"
+                onChange = {
+                    (e) => { setNFTName(e.target.value) }
                 }
-            }
-            value = { extURL }
-            style = {
-                { marginTop: 16 }
-            }
-            /> <
-            Input Placeholder = "animation url"
-            onChange = {
-                e => {
-                    setAnimationUrl(e.target.value);
+                value = { nftName }
+                style = {
+                    { marginTop: 16 }
                 }
-            }
-            value = { animationUrl }
-            style = {
-                { marginTop: 16 }
-            }
-            /> <
-            Input Placeholder = "youtube url"
-            onChange = {
-                e => {
-                    setYoutubeUrl(e.target.value);
+                />
+
+                <
+                TextArea placeholder = "description"
+                rows = { 4 }
+                style = {
+                    { marginTop: 16 }
                 }
-            }
-            value = { youtubeUrl }
-            style = {
-                { marginTop: 16 }
-            }
-            /> < /
-            div >
-        );
-
-        const [uPOBAnft, setUpobaNote] = useState();
-
-        const uPOBAform = ( <
-            div style = {
-                { maxWidth: 520, margin: "auto", paddingBottom: 32 }
-            } >
-            <
-            TextArea Placeholder = "uPOBAnft"
-            rows = { 16 }
-            style = {
-                { marginTop: 16 }
-            }
-            onChange = {
-                e => {
-                    setUpobaNote(e.target.value);
+                onChange = {
+                    (e) => { setNFTDesc(e.target.value) }
                 }
-            }
-            value = { uPOBAnft }
-            /> < /
-            div >
-        );
+                value = { nftDesc }
+                />
 
-
-        const uploadButton = ( <
-            div style = {
-                { padding: 16 }
-            } >
-            <
-            Button style = {
-                { margin: 8 }
-            }
-            loading = { sendThis }
-            size = "large"
-            shape = "round"
-            type = "primary"
-            disabled = {!uPOBAnft || !pobaName || !pobaDesc || !IMGipfs }
-            onClick = {
-                async() => {
-                    console.log(uPOBAnft, pobaName, pobaDesc, IMGipfs);
-                    console.log("UPLOADING...", yourJSON);
-
-                    let manifest = {
-                        name: pobaName,
-                        description: pobaDesc,
-                        image: "https://ipfs.io/ipfs/" + IMGipfs,
-                        uPOBAnft: uPOBAnft,
-                    };
-                    if (extURL) {
-                        manifest.external_url = extURL;
-                    }
-                    if (animationUrl) {
-                        manifest.animation_url = animationUrl;
-                    }
-                    if (youtubeUrl) {
-                        manifest.youtube_url = youtubeUrl;
-                    }
-
-                    //console.log("manifest",manifest)
-
-                    setSendingThis(true);
-                    setIpfsHash();
-                    const result = await ipfs.add(JSON.stringify(manifest)); // addToIPFS(JSON.stringify(yourJSON))
-                    setPOBAipfs(result.path);
-                    setSendingThis(false);
-                    console.log("RESULT:", result);
+                <
+                Input placeholder = "external url"
+                onChange = {
+                    (e) => { setNFTUrl(e.target.value) }
                 }
-            } >
-            Upload Manifest { " " } <
-            /Button>{" "} < /
-            div >
-        );
+                value = { nftUrl }
+                style = {
+                    { marginTop: 16 }
+                }
+                />
 
-        const [uPOBAminting, setUpobaMinting] = useState();
-        const [pobaResult, setUpobaResult] = useState("");
+                <
+                Input placeholder = "animation url"
+                onChange = {
+                    (e) => { setAnimationUrl(e.target.value) }
+                }
+                value = { animationUrl }
+                style = {
+                    { marginTop: 16 }
+                }
+                />
 
-        const upobaButton = ( <
-            Button style = {
-                { margin: 8 }
-            }
-            loading = { uPOBAminting }
-            size = "large"
-            shape = "round"
-            type = "primary"
-            disabled = {!uPOBAnft || !uPOBAipfs }
-            onClick = {
-                async() => {
-                    console.log("MINTING...", uPOBAipfs, uPOBAnft);
+                <
+                Input placeholder = "youtube url"
+                onChange = {
+                    (e) => { setYoutubeUrl(e.target.value) }
+                }
+                value = { youtubeUrl }
+                style = {
+                    { marginTop: 16 }
+                }
+                /> < /
+                div >
+            )
 
-                    setUpobaMinting(true);
+            const [notation, setNotation] = useState()
 
-                    const uPOBAresult = await tx(writeContracts.DogeClubSVG.mintU(uPOBAipfs, uPOBAnft));
+            const notationFormDisplay = ( <
+                div style = {
+                    { maxWidth: 520, margin: "auto", paddingBottom: 32 }
+                } >
+                <
+                TextArea placeholder = "notation"
+                rows = { 16 }
+                style = {
+                    { marginTop: 16 }
+                }
+                onChange = {
+                    (e) => { setNotation(e.target.value) }
+                }
+                value = { notation }
+                /> < /
+                div >
+            )
 
-                    setUpobaMinting(false);
+            const [manifestInIPFS, setManifestInIPFS] = useState();
 
-                    console.log("uPOBAresult", uPOBAresult);
-                    setUpobaResult( <
-                        div style = {
-                            { marginTop: 32, paddingBottom: 256 }
-                        } >
-                        <
-                        Link onClick = {
-                            () => {
-                                setRoute("/yourcollectibles");
-                            }
+
+            const uploadButton = ( <
+                div style = {
+                    { padding: 16 }
+                } >
+                <
+                Button style = {
+                    { margin: 8 }
+                }
+                loading = { sending }
+                size = "large"
+                shape = "round"
+                type = "primary"
+                disabled = {!notation || !nftName || !nftDesc || !imageInIpfs }
+                onClick = {
+                    async() => {
+                        console.log(notation, nftName, nftDesc, imageInIpfs)
+                        console.log("UPLOADING...", yourJSON);
+
+
+                        let manifest = {
+                            name: nftName,
+                            description: nftDesc,
+                            image: "https://ipfs.io/ipfs/" + imageInIpfs,
+                            notation: notation,
+                            /*
+
+                            skipping this for now, but eventually you could add:
+
+                            attributes: [
+                              {
+                                trait_type: "BackgroundColor",
+                                value: "green",
+                              },
+                              {
+                                trait_type: "Eyes",
+                                value: "googly",
+                              },
+                            ],*/
                         }
-                        to = "/yourcollectibles" > { " " }🎉🍾🎊
-                        Success!!!🏷Click here to view the { pobaName }
-                        POBA NFT!
-                        <
-                        /Link>{" "} < /
-                        div > ,
-                    );
+                        if (nftUrl) {
+                            manifest.external_url = nftUrl
+                        }
+                        if (animationUrl) {
+                            manifest.animation_url = animationUrl
+                        }
+                        if (youtubeUrl) {
+                            manifest.youtube_url = youtubeUrl
+                        }
+
+                        //console.log("manifest",manifest)
+
+                        setSending(true);
+                        setIpfsHash();
+                        const result = await ipfs.add(JSON.stringify(manifest)); // addToIPFS(JSON.stringify(yourJSON))
+                        setManifestInIPFS(result.path)
+                        setSending(false);
+                        console.log("RESULT:", result);
+                    }
+                } >
+                Upload Manifest <
+                /Button> < /
+                div >
+            )
+
+            const [minting, setMinting] = useState();
+
+            const [resultDisplay, setResultDisplay] = useState("");
+
+
+            const mintButton = ( <
+                Button style = {
+                    { margin: 8 }
                 }
-            } >
-            Mint NFT { " " } <
-            /Button>
-        );
+                loading = { minting }
+                size = "large"
+                shape = "round"
+                type = "primary"
+                disabled = {!notation || !manifestInIPFS }
+                onClick = {
+                    async() => {
+                        console.log("MINTING...", manifestInIPFS, notation);
+
+                        setMinting(true);
+
+                        const mintResult = await tx(writeContracts.DogeClubSVG.mintU(manifestInIPFS, notation))
+
+                        setMinting(false);
+
+                        console.log("mintResult", mintResult)
+                        setResultDisplay( <
+                            div style = {
+                                { marginTop: 32, paddingBottom: 256 }
+                            } >
+                            <
+                            Link onClick = {
+                                () => { setRoute("/yourcollectibles") }
+                            }
+                            to = "/yourcollectibles" > 🎉🍾🎊Success!!!🏷Click here to view the { nftName }
+                            NotationNFT!
+                            <
+                            /Link> < /
+                            div >
+                        )
+
+                    }
+                } >
+                Mint NFT <
+                /Button>
+            )
+
+            ////====================  ////====================  ////====================  ////====================  ////====================  ////====================  ////====================
+
+
+
+
         ////////////////////////////////////////////////////////////////
 
 
-  const galleryList = [];
 
   return (
     <div className="App">
@@ -648,12 +631,7 @@ const uPOBAupload = ( <
 
         <Switch>
           <Route exact path="/">
-            {/*
-                🎛 this scaffolding is full of commonly used components
-                this <Contract/> component will automatically parse your ABI
-                and give you a form to interact with it locally
-            */}
-
+            {}
             <div style={{ maxWidth: 820, margin: "auto", marginTop: 32, paddingBottom: 32 }}>
               {isSigner?(
                 <Button type={"primary"} onClick={()=>{
@@ -726,65 +704,36 @@ const uPOBAupload = ( <
             </div>
           </Route>
                     <Route exact path="/upoba">
-          <
-            div style = {
-                { width: 600, margin: "auto", marginTop: 32, paddingBottom: 32 }
-            } > { displayPOBAform } { POBAimageUpload } { " " } {
-                IMGipfs ? ( <
-                    div style = {
+          <div style = {{ width: 600, margin: "auto", marginTop: 32, paddingBottom: 32 }} >
+          
+            { textFormDisplay }
+
+            { imageUploadAndDisplay }
+
+            {
+                imageInIpfs ? < div style = {
+                    { padding: 16 }
+                } > < Paragraph copyable > { imageInIpfs } < /Paragraph></div > : < div style = {
+                    { padding: 16 }
+                } > < /div>}
+
+                { notationFormDisplay }
+
+                { uploadButton }
+
+                {
+                    manifestInIPFS ? < div style = {
                         { padding: 16 }
-                    } > { " " } <
-                    Paragraph copyable > { IMGipfs } < /Paragraph>{" "} < /
-                    div >
-                ) : ( <
-                    div style = {
+                    } > < Paragraph copyable > { manifestInIPFS } < /Paragraph></div > : < div style = {
                         { padding: 16 }
-                    } > < /div>
-                )
-            } { uPOBAform } { uploadButton } {
-                uPOBAipfs ? ( <
-                    div style = {
-                        { padding: 16 }
-                    } > { " " } <
-                    Paragraph copyable > { uPOBAipfs } < /Paragraph>< /
-                    div >
-                ) : ( <
-                    div style = {
-                        { padding: 16 }
-                    } > < /div>
-                )
-            } { upobaButton } { pobaResult } <
-            /div> < /
-            Route > { " " } <
-            Route path = "/ipfsup" >
-            <
-            div style = {
-                { paddingTop: 32, width: 740, margin: "auto", textAlign: "left" }
-            } >
-            <
-            ReactJson style = {
-                { padding: 8 }
-            }
-            src = { yourJSON }
-            theme = "pop"
-            enableClipboard = { false }
-            onEdit = {
-                (edit, a) => {
-                    setYourJSON(edit.updated_src);
-                }
-            }
-            onAdd = {
-                (add, a) => {
-                    setYourJSON(add.updated_src);
-                }
-            }
-            onDelete = {
-                (del, a) => {
-                    setYourJSON(del.updated_src);
-                }
-            }
-            /> < /
-            div >
+                    } > < /div>}
+
+                    { mintButton }
+
+                    { resultDisplay }
+
+ 
+            </div >
           </Route>
           <Route path="/debug">
 

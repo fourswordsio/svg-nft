@@ -323,7 +323,7 @@ export const NETWORKS = {
     name: "rinkeby",
     color: "#e0d068",
     chainId: 4,
-    rpcUrl: `https://rinkeby.infura.io/v3/8568aa65b4e84a9fa53f3a468b67ef21`,
+    rpcUrl: `https://speedy-nodes-nyc.moralis.io/d0553b4370fc344989d16e94/eth/rinkeby/`,
     faucet: "https://faucet.rinkeby.io/",
     blockExplorer: "https://rinkeby.etherscan.io/",
   },

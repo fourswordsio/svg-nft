@@ -1,9 +1,9 @@
 {
   "_format": "hh-sol-cache-2",
   "files": {
-    "C:\\Users\\lucyc\\OneDrive\\Documents\\DAPPS\\loogies\\packages\\hardhat\\contracts\\DogeClubSVG.sol": {
-      "lastModificationDate": 1643585002781,
-      "contentHash": "53a22a46c26c124219b69dce1169d2dc",
+    "C:\\Users\\lucyc\\OneDrive\\Documents\\GitHub\\svg-nft\\packages\\hardhat\\contracts\\DogeClubSVG.sol": {
+      "lastModificationDate": 1643748259019,
+      "contentHash": "42adcbbc5caafdd471d4aea43438ed64",
       "sourceName": "contracts/DogeClubSVG.sol",
       "solcConfig": {
         "version": "0.6.7",
@@ -29,7 +29,7 @@
         }
       },
       "imports": [
-        "@openzeppelin/contracts/token/ERC721/ERC721.sol",
+        "@openzeppelin/contracts/presets/ERC721PresetMinterPauserAutoId.sol",
         "@openzeppelin/contracts/utils/Counters.sol",
         "@openzeppelin/contracts/access/Ownable.sol",
         "@openzeppelin/contracts/utils/Strings.sol",
@@ -44,7 +44,7 @@
         "DogeClubSVG"
       ]
     },
-    "C:\\Users\\lucyc\\OneDrive\\Documents\\DAPPS\\loogies\\packages\\hardhat\\contracts\\HexStrings.sol": {
+    "C:\\Users\\lucyc\\OneDrive\\Documents\\GitHub\\svg-nft\\packages\\hardhat\\contracts\\HexStrings.sol": {
       "lastModificationDate": 1643156716200,
       "contentHash": "5ce991e99052a5746d0c9c3475d87cf8",
       "sourceName": "contracts/HexStrings.sol",
@@ -79,7 +79,7 @@
         "HexStrings"
       ]
     },
-    "C:\\Users\\lucyc\\OneDrive\\Documents\\DAPPS\\loogies\\packages\\hardhat\\node_modules\\@openzeppelin\\contracts\\utils\\Strings.sol": {
+    "C:\\Users\\lucyc\\OneDrive\\Documents\\GitHub\\svg-nft\\packages\\hardhat\\node_modules\\@openzeppelin\\contracts\\utils\\Strings.sol": {
       "lastModificationDate": 1634671074502,
       "contentHash": "c86a31bacf868d392eda08a0eccc4735",
       "sourceName": "@openzeppelin/contracts/utils/Strings.sol",
@@ -114,9 +114,9 @@
         "Strings"
       ]
     },
-    "C:\\Users\\lucyc\\OneDrive\\Documents\\DAPPS\\loogies\\packages\\hardhat\\node_modules\\@openzeppelin\\contracts\\token\\ERC721\\ERC721.sol": {
-      "lastModificationDate": 1634671074085,
-      "contentHash": "2d9804eb2b6f41ea0a65115e154d90eb",
+    "C:\\Users\\lucyc\\OneDrive\\Documents\\GitHub\\svg-nft\\packages\\hardhat\\node_modules\\@openzeppelin\\contracts\\token\\ERC721\\ERC721.sol": {
+      "lastModificationDate": 1643748655643,
+      "contentHash": "4bc43c1a49e569b208895cd2114a27fe",
       "sourceName": "@openzeppelin/contracts/token/ERC721/ERC721.sol",
       "solcConfig": {
         "version": "0.7.6",
@@ -161,7 +161,7 @@
         "ERC721"
       ]
     },
-    "C:\\Users\\lucyc\\OneDrive\\Documents\\DAPPS\\loogies\\packages\\hardhat\\node_modules\\@openzeppelin\\contracts\\utils\\Context.sol": {
+    "C:\\Users\\lucyc\\OneDrive\\Documents\\GitHub\\svg-nft\\packages\\hardhat\\node_modules\\@openzeppelin\\contracts\\utils\\Context.sol": {
       "lastModificationDate": 1634671073925,
       "contentHash": "2adbd82f6d055a4751566d4671512b03",
       "sourceName": "@openzeppelin/contracts/utils/Context.sol",
@@ -196,7 +196,7 @@
         "Context"
       ]
     },
-    "C:\\Users\\lucyc\\OneDrive\\Documents\\DAPPS\\loogies\\packages\\hardhat\\node_modules\\@openzeppelin\\contracts\\token\\ERC721\\IERC721.sol": {
+    "C:\\Users\\lucyc\\OneDrive\\Documents\\GitHub\\svg-nft\\packages\\hardhat\\node_modules\\@openzeppelin\\contracts\\token\\ERC721\\IERC721.sol": {
       "lastModificationDate": 1634671074218,
       "contentHash": "e82621b83943f11c44988c60e83d6ebc",
       "sourceName": "@openzeppelin/contracts/token/ERC721/IERC721.sol",
@@ -233,7 +233,7 @@
         "IERC721"
       ]
     },
-    "C:\\Users\\lucyc\\OneDrive\\Documents\\DAPPS\\loogies\\packages\\hardhat\\node_modules\\@openzeppelin\\contracts\\token\\ERC721\\IERC721Metadata.sol": {
+    "C:\\Users\\lucyc\\OneDrive\\Documents\\GitHub\\svg-nft\\packages\\hardhat\\node_modules\\@openzeppelin\\contracts\\token\\ERC721\\IERC721Metadata.sol": {
       "lastModificationDate": 1634671074236,
       "contentHash": "370e7a48f316401b5063bcb604843e1b",
       "sourceName": "@openzeppelin/contracts/token/ERC721/IERC721Metadata.sol",
@@ -270,7 +270,7 @@
         "IERC721Metadata"
       ]
     },
-    "C:\\Users\\lucyc\\OneDrive\\Documents\\DAPPS\\loogies\\packages\\hardhat\\node_modules\\@openzeppelin\\contracts\\token\\ERC721\\IERC721Enumerable.sol": {
+    "C:\\Users\\lucyc\\OneDrive\\Documents\\GitHub\\svg-nft\\packages\\hardhat\\node_modules\\@openzeppelin\\contracts\\token\\ERC721\\IERC721Enumerable.sol": {
       "lastModificationDate": 1634671074226,
       "contentHash": "eaebc3874248c26f6ea0b13b9a140a94",
       "sourceName": "@openzeppelin/contracts/token/ERC721/IERC721Enumerable.sol",
@@ -307,7 +307,7 @@
         "IERC721Enumerable"
       ]
     },
-    "C:\\Users\\lucyc\\OneDrive\\Documents\\DAPPS\\loogies\\packages\\hardhat\\node_modules\\@openzeppelin\\contracts\\token\\ERC721\\IERC721Receiver.sol": {
+    "C:\\Users\\lucyc\\OneDrive\\Documents\\GitHub\\svg-nft\\packages\\hardhat\\node_modules\\@openzeppelin\\contracts\\token\\ERC721\\IERC721Receiver.sol": {
       "lastModificationDate": 1634671074240,
       "contentHash": "fad0b3f4424bdbb4b35467b29ea8d334",
       "sourceName": "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol",
@@ -342,7 +342,7 @@
         "IERC721Receiver"
       ]
     },
-    "C:\\Users\\lucyc\\OneDrive\\Documents\\DAPPS\\loogies\\packages\\hardhat\\node_modules\\@openzeppelin\\contracts\\introspection\\ERC165.sol": {
+    "C:\\Users\\lucyc\\OneDrive\\Documents\\GitHub\\svg-nft\\packages\\hardhat\\node_modules\\@openzeppelin\\contracts\\introspection\\ERC165.sol": {
       "lastModificationDate": 1634671074021,
       "contentHash": "08f854e2dd3c262845bba38c9b48e4e0",
       "sourceName": "@openzeppelin/contracts/introspection/ERC165.sol",
@@ -379,7 +379,7 @@
         "ERC165"
       ]
     },
-    "C:\\Users\\lucyc\\OneDrive\\Documents\\DAPPS\\loogies\\packages\\hardhat\\node_modules\\@openzeppelin\\contracts\\math\\SafeMath.sol": {
+    "C:\\Users\\lucyc\\OneDrive\\Documents\\GitHub\\svg-nft\\packages\\hardhat\\node_modules\\@openzeppelin\\contracts\\math\\SafeMath.sol": {
       "lastModificationDate": 1634671074462,
       "contentHash": "e03e12206057e809eb76c5f681170c32",
       "sourceName": "@openzeppelin/contracts/math/SafeMath.sol",
@@ -414,7 +414,7 @@
         "SafeMath"
       ]
     },
-    "C:\\Users\\lucyc\\OneDrive\\Documents\\DAPPS\\loogies\\packages\\hardhat\\node_modules\\@openzeppelin\\contracts\\utils\\Address.sol": {
+    "C:\\Users\\lucyc\\OneDrive\\Documents\\GitHub\\svg-nft\\packages\\hardhat\\node_modules\\@openzeppelin\\contracts\\utils\\Address.sol": {
       "lastModificationDate": 1634671073881,
       "contentHash": "7aa46886ff5abe7515496208a5e2ce5a",
       "sourceName": "@openzeppelin/contracts/utils/Address.sol",
@@ -449,7 +449,7 @@
         "Address"
       ]
     },
-    "C:\\Users\\lucyc\\OneDrive\\Documents\\DAPPS\\loogies\\packages\\hardhat\\node_modules\\@openzeppelin\\contracts\\utils\\EnumerableSet.sol": {
+    "C:\\Users\\lucyc\\OneDrive\\Documents\\GitHub\\svg-nft\\packages\\hardhat\\node_modules\\@openzeppelin\\contracts\\utils\\EnumerableSet.sol": {
       "lastModificationDate": 1634671073977,
       "contentHash": "db7b1afdb2c204e1e52100b79f0c847e",
       "sourceName": "@openzeppelin/contracts/utils/EnumerableSet.sol",
@@ -484,7 +484,7 @@
         "EnumerableSet"
       ]
     },
-    "C:\\Users\\lucyc\\OneDrive\\Documents\\DAPPS\\loogies\\packages\\hardhat\\node_modules\\@openzeppelin\\contracts\\utils\\EnumerableMap.sol": {
+    "C:\\Users\\lucyc\\OneDrive\\Documents\\GitHub\\svg-nft\\packages\\hardhat\\node_modules\\@openzeppelin\\contracts\\utils\\EnumerableMap.sol": {
       "lastModificationDate": 1634671073969,
       "contentHash": "b1bb8570824c668943149211d74d6c51",
       "sourceName": "@openzeppelin/contracts/utils/EnumerableMap.sol",
@@ -519,7 +519,7 @@
         "EnumerableMap"
       ]
     },
-    "C:\\Users\\lucyc\\OneDrive\\Documents\\DAPPS\\loogies\\packages\\hardhat\\node_modules\\@openzeppelin\\contracts\\introspection\\IERC165.sol": {
+    "C:\\Users\\lucyc\\OneDrive\\Documents\\GitHub\\svg-nft\\packages\\hardhat\\node_modules\\@openzeppelin\\contracts\\introspection\\IERC165.sol": {
       "lastModificationDate": 1634671074194,
       "contentHash": "0d62a8380952235f135dae91590f90a3",
       "sourceName": "@openzeppelin/contracts/introspection/IERC165.sol",
@@ -554,7 +554,7 @@
         "IERC165"
       ]
     },
-    "C:\\Users\\lucyc\\OneDrive\\Documents\\DAPPS\\loogies\\packages\\hardhat\\node_modules\\@openzeppelin\\contracts\\utils\\Counters.sol": {
+    "C:\\Users\\lucyc\\OneDrive\\Documents\\GitHub\\svg-nft\\packages\\hardhat\\node_modules\\@openzeppelin\\contracts\\utils\\Counters.sol": {
       "lastModificationDate": 1634671073936,
       "contentHash": "304a56eb1322144704fb39f8c7e6d722",
       "sourceName": "@openzeppelin/contracts/utils/Counters.sol",
@@ -591,7 +591,7 @@
         "Counters"
       ]
     },
-    "C:\\Users\\lucyc\\OneDrive\\Documents\\DAPPS\\loogies\\packages\\hardhat\\node_modules\\@openzeppelin\\contracts\\access\\Ownable.sol": {
+    "C:\\Users\\lucyc\\OneDrive\\Documents\\GitHub\\svg-nft\\packages\\hardhat\\node_modules\\@openzeppelin\\contracts\\access\\Ownable.sol": {
       "lastModificationDate": 1634671074342,
       "contentHash": "6748815a5b45c4aeeda56819f41190e0",
       "sourceName": "@openzeppelin/contracts/access/Ownable.sol",
@@ -628,7 +628,7 @@
         "Ownable"
       ]
     },
-    "C:\\Users\\lucyc\\OneDrive\\Documents\\DAPPS\\loogies\\packages\\hardhat\\contracts\\ToColor.sol": {
+    "C:\\Users\\lucyc\\OneDrive\\Documents\\GitHub\\svg-nft\\packages\\hardhat\\contracts\\ToColor.sol": {
       "lastModificationDate": 1643156716200,
       "contentHash": "fe337dcdcc64d308db41d26f620468b6",
       "sourceName": "contracts/ToColor.sol",
@@ -661,7 +661,7 @@
         "ToColor"
       ]
     },
-    "C:\\Users\\lucyc\\OneDrive\\Documents\\DAPPS\\loogies\\packages\\hardhat\\node_modules\\base64-sol\\base64.sol": {
+    "C:\\Users\\lucyc\\OneDrive\\Documents\\GitHub\\svg-nft\\packages\\hardhat\\node_modules\\base64-sol\\base64.sol": {
       "lastModificationDate": 1640893705986,
       "contentHash": "0d54cb6a748ddde95d92ed7802c9248d",
       "sourceName": "base64-sol/base64.sol",
@@ -694,6 +694,200 @@
       ],
       "artifacts": [
         "Base64"
+      ]
+    },
+    "C:\\Users\\lucyc\\OneDrive\\Documents\\GitHub\\svg-nft\\packages\\hardhat\\node_modules\\@openzeppelin\\contracts\\token\\ERC721\\ERC721Pausable.sol": {
+      "lastModificationDate": 1634671074105,
+      "contentHash": "46f79ddd76e77a7c5bf841b830d0ed1e",
+      "sourceName": "@openzeppelin/contracts/token/ERC721/ERC721Pausable.sol",
+      "solcConfig": {
+        "version": "0.7.6",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./ERC721.sol",
+        "../../utils/Pausable.sol"
+      ],
+      "versionPragmas": [
+        ">=0.6.0 <0.8.0"
+      ],
+      "artifacts": [
+        "ERC721Pausable"
+      ]
+    },
+    "C:\\Users\\lucyc\\OneDrive\\Documents\\GitHub\\svg-nft\\packages\\hardhat\\node_modules\\@openzeppelin\\contracts\\utils\\Pausable.sol": {
+      "lastModificationDate": 1634671074352,
+      "contentHash": "6960b40911542e6004ab95031ef9c3b9",
+      "sourceName": "@openzeppelin/contracts/utils/Pausable.sol",
+      "solcConfig": {
+        "version": "0.7.6",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./Context.sol"
+      ],
+      "versionPragmas": [
+        ">=0.6.0 <0.8.0"
+      ],
+      "artifacts": [
+        "Pausable"
+      ]
+    },
+    "C:\\Users\\lucyc\\OneDrive\\Documents\\GitHub\\svg-nft\\packages\\hardhat\\node_modules\\@openzeppelin\\contracts\\token\\ERC721\\ERC721Burnable.sol": {
+      "lastModificationDate": 1634671074087,
+      "contentHash": "ecaa795345e7a1731adc7e58c9812942",
+      "sourceName": "@openzeppelin/contracts/token/ERC721/ERC721Burnable.sol",
+      "solcConfig": {
+        "version": "0.7.6",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../../utils/Context.sol",
+        "./ERC721.sol"
+      ],
+      "versionPragmas": [
+        ">=0.6.0 <0.8.0"
+      ],
+      "artifacts": [
+        "ERC721Burnable"
+      ]
+    },
+    "C:\\Users\\lucyc\\OneDrive\\Documents\\GitHub\\svg-nft\\packages\\hardhat\\node_modules\\@openzeppelin\\contracts\\presets\\ERC721PresetMinterPauserAutoId.sol": {
+      "lastModificationDate": 1634671074114,
+      "contentHash": "88efc77587a940f73f1b3927382c3dd0",
+      "sourceName": "@openzeppelin/contracts/presets/ERC721PresetMinterPauserAutoId.sol",
+      "solcConfig": {
+        "version": "0.7.6",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../access/AccessControl.sol",
+        "../utils/Context.sol",
+        "../utils/Counters.sol",
+        "../token/ERC721/ERC721.sol",
+        "../token/ERC721/ERC721Burnable.sol",
+        "../token/ERC721/ERC721Pausable.sol"
+      ],
+      "versionPragmas": [
+        ">=0.6.0 <0.8.0"
+      ],
+      "artifacts": [
+        "ERC721PresetMinterPauserAutoId"
+      ]
+    },
+    "C:\\Users\\lucyc\\OneDrive\\Documents\\GitHub\\svg-nft\\packages\\hardhat\\node_modules\\@openzeppelin\\contracts\\access\\AccessControl.sol": {
+      "lastModificationDate": 1634671073875,
+      "contentHash": "54eb0b53c109558e8312811342e95bf0",
+      "sourceName": "@openzeppelin/contracts/access/AccessControl.sol",
+      "solcConfig": {
+        "version": "0.7.6",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../utils/EnumerableSet.sol",
+        "../utils/Address.sol",
+        "../utils/Context.sol"
+      ],
+      "versionPragmas": [
+        ">=0.6.0 <0.8.0"
+      ],
+      "artifacts": [
+        "AccessControl"
       ]
     }
   }

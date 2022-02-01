@@ -1,6 +1,6 @@
 pragma solidity >=0.6.0 <0.7.0;
 //SPDX-License-Identifier: MIT
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/presets/ERC721PresetMinterPauserAutoId.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
@@ -17,34 +17,15 @@ contract DogeClubSVG is ERC721, Ownable {
   using Counters for Counters.Counter;
   Counters.Counter private _tokenIds;
 
-  constructor() public ERC721("DogeClub", "DC") {
-    // RELEASE THE DogS!
+  constructor() public ERC721("DogeClub SVG", "DC") {
+    // RELEASE THE SergeyS!
   }
 
   mapping (uint256 => bytes3) public color;
-  mapping (uint256 => uint256) public chubbiness;
-  mapping (uint256 => string) public upoba;
+  mapping (uint256 => uint256) public burgers;
+
 
   uint256 mintDeadline = block.timestamp + 24 hours;
-
- function mintU(string memory tokenURI, string memory _upoba)
-      public
-      returns (uint256)
-  {
-
-      bytes32 uriHash = keccak256(abi.encodePacked(tokenURI));
-
-      _tokenIds.increment();
-
-      uint256 id = _tokenIds.current();
-      _mint(msg.sender, id);
-      _setTokenURI(id, tokenURI);
-
-      upoba[id] = _upoba;
-
-      return id;
-  }
-
 
   function mintItem()
       public
@@ -58,15 +39,15 @@ contract DogeClubSVG is ERC721, Ownable {
 
       bytes32 predictableRandom = keccak256(abi.encodePacked( blockhash(block.number-1), msg.sender, address(this), id ));
       color[id] = bytes2(predictableRandom[0]) | ( bytes2(predictableRandom[1]) >> 8 ) | ( bytes3(predictableRandom[2]) >> 16 );
-      chubbiness[id] = 35+((55*uint256(uint8(predictableRandom[3])))/255);
+      burgers[id] = 35+((55*uint256(uint8(predictableRandom[3])))/255);
 
       return id;
   }
 
   function tokenURI(uint256 id) public view override returns (string memory) {
       require(_exists(id), "not exist");
-      string memory name = string(abi.encodePacked('Dog #',id.toString()));
-      string memory description = string(abi.encodePacked('This Dog is the color #',color[id].toColor(),' with a chubbiness of ',uint2str(chubbiness[id]),'!!!'));
+      string memory name = string(abi.encodePacked('Sergey #',id.toString()));
+      string memory description = string(abi.encodePacked('This Sergey is the color #',color[id].toColor(),' with a burger count of ',uint2str(burgers[id]),'!!!'));
       string memory image = Base64.encode(bytes(generateSVGofTokenById(id)));
 
       return
@@ -84,8 +65,8 @@ contract DogeClubSVG is ERC721, Ownable {
                               id.toString(),
                               '", "attributes": [{"trait_type": "color", "value": "#',
                               color[id].toColor(),
-                              '"},{"trait_type": "chubbiness", "value": ',
-                              uint2str(chubbiness[id]),
+                              '"},{"trait_type": "burgers", "value": ',
+                              uint2str(burgers[id]),
                               '}], "owner":"',
                               (uint160(ownerOf(id))).toHexString(20),
                               '", "image": "',
@@ -121,7 +102,7 @@ contract DogeClubSVG is ERC721, Ownable {
           '<ellipse fill="#',
           color[id].toColor(),
           '" stroke-width="3" cx="204.5" cy="211.80065" id="svg_5" rx="',
-          chubbiness[id].toString(),
+          burgers[id].toString(),
           '" ry="51.80065" stroke="#000"/>',
         '</g>',
         '<g id="eye2">',

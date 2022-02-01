@@ -156,7 +156,7 @@ module.exports = [
         "type": "uint256"
       }
     ],
-    "name": "chubbiness",
+    "name": "burgers",
     "outputs": [
       {
         "internalType": "uint256",
@@ -232,30 +232,6 @@ module.exports = [
   {
     "inputs": [],
     "name": "mintItem",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "tokenURI",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "_upoba",
-        "type": "string"
-      }
-    ],
-    "name": "mintU",
     "outputs": [
       {
         "internalType": "uint256",
@@ -547,25 +523,6 @@ module.exports = [
     "name": "transferOwnership",
     "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "upoba",
-    "outputs": [
-      {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
-      }
-    ],
-    "stateMutability": "view",
     "type": "function"
   }
 ];

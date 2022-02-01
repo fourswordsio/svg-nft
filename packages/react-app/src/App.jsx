@@ -2,7 +2,7 @@ import { LinkOutlined } from "@ant-design/icons";
 import { StaticJsonRpcProvider, Web3Provider } from "@ethersproject/providers";
 import { formatEther, parseEther } from "@ethersproject/units";
 import WalletConnectProvider from "@walletconnect/web3-provider";
-import { Alert, Button, Card, Col, Input, List, Spin, Typography, Upload, Menu, Row } from "antd";
+import { Alert, Button, Card, Col, Input, List, Menu, Row } from "antd";
 import "antd/dist/antd.css";
 import { useUserAddress } from "eth-hooks";
 import { utils } from "ethers";
@@ -13,7 +13,7 @@ import StackGrid from "react-stack-grid";
 import Web3Modal from "web3modal";
 import "./App.css";
 //import assets from "./assets.js";
-import { Account, Address, AddressInput, Contract, Faucet, GasGauge, Header, Ramp,  ThemeSwitch } from "./components";
+import { Account, Address, AddressInput, Contract, Faucet, GasGauge, Header, Ramp, ThemeSwitch } from "./components";
 import { DAI_ABI, DAI_ADDRESS, INFURA_ID, NETWORK, NETWORKS } from "./constants";
 import { Transactor } from "./helpers";
 import {
@@ -29,29 +29,24 @@ import {
 } from "./hooks";
 import { BlockPicker } from 'react-color'
 
+
 const { BufferList } = require("bl");
+// https://www.npmjs.com/package/ipfs-http-client
 const ipfsAPI = require("ipfs-http-client");
+
 const ipfs = ipfsAPI({ host: "ipfs.infura.io", port: "5001", protocol: "https" });
+
 //console.log("📦 Assets: ", assets);
-const targetNetwork = NETWORKS.rinkeby; 
+
+
+/// 📡 What chain are your contracts deployed to?
+const targetNetwork = NETWORKS.rinkeby; // <------- select your target frontend network (localhost, rinkeby, xdai, mainnet)
+
+// 😬 Sorry for all the console logging
 const DEBUG = true;
 
-const STARTING_JSON = {
-    description: "upoba custom nft",
-    external_url: "https://fourswords.io", // <-- this can link to a page for the specific file too
-    image: "https://storage.googleapis.com/fourswordsio-media/2020/09/2020/09/c152d28d-fourswords-logo.png",
-    name: "FourSwords",
-    attributes: [{
-            trait_type: "BackgroundColor",
-            value: "green",
-        },
-        {
-            trait_type: "Eyes",
-            value: "googly",
-        },
-    ],
-};
-
+// helper function to "Get" from IPFS
+// you usually go content.toString() after this...
 const getFromIPFS = async hashToGet => {
   for await (const file of ipfs.get(hashToGet)) {
     console.log(file.path);
@@ -67,16 +62,28 @@ const getFromIPFS = async hashToGet => {
 
 // 🛰 providers
 if (DEBUG) console.log("📡 Connecting to Mainnet Ethereum");
+// const mainnetProvider = getDefaultProvider("mainnet", { infura: INFURA_ID, etherscan: ETHERSCAN_KEY, quorum: 1 });
+// const mainnetProvider = new InfuraProvider("mainnet",INFURA_ID);
 //
-const scaffoldEthProvider = new StaticJsonRpcProvider("https://speedy-nodes-nyc.moralis.io/d0553b4370fc344989d16e94/eth/rinkeby/");
-const mainnetInfura = new StaticJsonRpcProvider("https://speedy-nodes-nyc.moralis.io/d0553b4370fc344989d16e94/eth/rinkeby/");
+// attempt to connect to our own scaffold eth rpc and if that fails fall back to infura...
+// Using StaticJsonRpcProvider as the chainId won't change see https://github.com/ethers-io/ethers.js/issues/901
+const scaffoldEthProvider = new StaticJsonRpcProvider("https://rpc.scaffoldeth.io:48544");
+const mainnetInfura = new StaticJsonRpcProvider("https://mainnet.infura.io/v3/" + INFURA_ID);
+// ( ⚠️ Getting "failed to meet quorum" errors? Check your INFURA_I
+
+// 🏠 Your local provider is usually pointed at your local blockchain
 const localProviderUrl = targetNetwork.rpcUrl;
+// as you deploy to other networks you can set REACT_APP_PROVIDER=https://dai.poa.network in packages/react-app/.env
 const localProviderUrlFromEnv = process.env.REACT_APP_PROVIDER ? process.env.REACT_APP_PROVIDER : localProviderUrl;
 if (DEBUG) console.log("🏠 Connecting to provider:", localProviderUrlFromEnv);
 const localProvider = new StaticJsonRpcProvider(localProviderUrlFromEnv);
+
+// 🔭 block explorer URL
 const blockExplorer = targetNetwork.blockExplorer;
-const { TextArea } = Input;
-const { Paragraph } = Typography;
+
+/*
+  Web3 modal helps us "connect" external wallets:
+*/
 const web3Modal = new Web3Modal({
   // network: "mainnet", // optional
   cacheProvider: true, // optional
@@ -137,23 +144,10 @@ function App(props) {
   // If you want to make 🔐 write transactions to your contracts, use the userProvider:
   const writeContracts = useContractLoader(userProvider);
 
-    const mainnetDAIContract = useExternalContractLoader(mainnetProvider, DAI_ADDRESS, DAI_ABI);
-
   // EXTERNAL CONTRACT EXAMPLE:
   //
   // If you want to bring in the mainnet DAI contract it would look like:
   const isSigner = injectedProvider && injectedProvider.getSigner && injectedProvider.getSigner()._isSigner;
-
-
-    // If you want to call a function on a new block
-    useOnBlock(mainnetProvider, () => {
-        console.log(`⛓ A new mainnet block is here: ${mainnetProvider._lastBlockNumber}`);
-    });
-
-    // Then read your DAI balance like:
-    const myMainnetDAIBalance = useContractReader({ DAI: mainnetDAIContract }, "DAI", "balanceOf", [
-        "0x95b58a6bff3d14b7db2f5cb5f0ad413dc2940658",
-    ]);
 
   // If you want to call a function on a new block
   useOnBlock(mainnetProvider, () => {
@@ -180,144 +174,182 @@ function App(props) {
   const yourBalance = balance && balance.toNumber && balance.toNumber();
   const [yourCollectibles, setYourCollectibles] = useState();
 
-    useEffect(() => {
-        const updateYourCollectibles = async() => {
-            const collectibleUpdate = [];
-            for (let tokenIndex = 0; tokenIndex < balance; tokenIndex++) {
-                try {
-                    console.log("GEtting token index", tokenIndex);
-                    const tokenId = await readContracts.ABCNotationNFT.tokenOfOwnerByIndex(address, tokenIndex);
-                    console.log("tokenId", tokenId);
-                    const tokenURI = await readContracts.ABCNotationNFT.tokenURI(tokenId);
-                    console.log("tokenURI", tokenURI);
+  useEffect(() => {
+    const updateYourCollectibles = async () => {
+      const collectibleUpdate = [];
+      for (let tokenIndex = 0; tokenIndex < balance; tokenIndex++) {
+        try {
+          console.log("GEtting token index", tokenIndex);
+          const tokenId = await readContracts.DogeClubSVG.tokenOfOwnerByIndex(address, tokenIndex);
+          console.log("tokenId", tokenId);
+          const tokenURI = await readContracts.DogeClubSVG.tokenURI(tokenId);
+          const jsonManifestString = atob(tokenURI.substring(29))
+          console.log("jsonManifestString", jsonManifestString);
+/*
+          const ipfsHash = tokenURI.replace("https://ipfs.io/ipfs/", "");
+          console.log("ipfsHash", ipfsHash);
 
-                    const notation = await readContracts.ABCNotationNFT.notation(tokenId);
-                    console.log("notation", notation);
+          const jsonManifestBuffer = await getFromIPFS(ipfsHash);
 
-                    const ipfsHash = tokenURI.replace("https://ipfs.io/ipfs/", "");
-                    console.log("ipfsHash", ipfsHash);
-                    const jsonManifestBuffer = await getFromIPFS(ipfsHash);
+        */
+          try {
+            const jsonManifest = JSON.parse(jsonManifestString);
+            console.log("jsonManifest", jsonManifest);
+            collectibleUpdate.push({ id: tokenId, uri: tokenURI, owner: address, ...jsonManifest });
+          } catch (e) {
+            console.log(e);
+          }
 
-                    try {
-                        const jsonManifest = JSON.parse(jsonManifestBuffer.toString());
-                        console.log("jsonManifest", jsonManifest);
-                        collectibleUpdate.push({ id: tokenId, notation: notation, index: tokenIndex, uri: tokenURI, owner: address, ...jsonManifest });
-                    } catch (e) {
-                        console.log(e);
-                    }
-
-                } catch (e) {
-                    console.log(e);
-                }
-            }
-            setYourCollectibles(collectibleUpdate);
-        };
-        updateYourCollectibles();
-    }, [address, yourBalance]);
-
-
-    //
-    // 🧫 DEBUG 👨🏻‍🔬
-    //
-    useEffect(() => {
-        if (
-            DEBUG &&
-            mainnetProvider &&
-            address &&
-            selectedChainId &&
-            yourLocalBalance &&
-            yourMainnetBalance &&
-            readContracts &&
-            writeContracts &&
-            mainnetDAIContract
-        ) {
-            console.log("_____________________________________ 🏗 scaffold-eth _____________________________________");
-            console.log("🌎 mainnetProvider", mainnetProvider);
-            console.log("🏠 localChainId", localChainId);
-            console.log("👩‍💼 selected address:", address);
-            console.log("🕵🏻‍♂️ selectedChainId:", selectedChainId);
-            console.log("💵 yourLocalBalance", yourLocalBalance ? formatEther(yourLocalBalance) : "...");
-            console.log("💵 yourMainnetBalance", yourMainnetBalance ? formatEther(yourMainnetBalance) : "...");
-            console.log("📝 readContracts", readContracts);
-            console.log("🌍 DAI contract on mainnet:", mainnetDAIContract);
-            console.log("🔐 writeContracts", writeContracts);
+        } catch (e) {
+          console.log(e);
         }
-    }, [
-        mainnetProvider,
-        address,
-        selectedChainId,
-        yourLocalBalance,
-        yourMainnetBalance,
-        readContracts,
-        writeContracts,
-        mainnetDAIContract,
-    ]);
+      }
+      setYourCollectibles(collectibleUpdate.reverse());
+    };
+    updateYourCollectibles();
+  }, [address, yourBalance]);
 
-    let networkDisplay = "";
-    const loadWeb3Modal = useCallback(async() => {
-        const provider = await web3Modal.connect();
-        setInjectedProvider(new Web3Provider(provider));
-    }, [setInjectedProvider]);
+  /*
+  const addressFromENS = useResolveName(mainnetProvider, "austingriffith.eth");
+  console.log("🏷 Resolved austingriffith.eth as:",addressFromENS)
+  */
 
-    useEffect(() => {
-        if (web3Modal.cachedProvider) {
-            loadWeb3Modal();
-        }
-    }, [loadWeb3Modal]);
-
-    const [route, setRoute] = useState();
-    useEffect(() => {
-        setRoute(window.location.pathname);
-    }, [setRoute]);
-
-    let faucetHint = "";
-    const faucetAvailable = localProvider && localProvider.connection && targetNetwork.name === "localhost";
-
-    const [faucetClicked, setFaucetClicked] = useState(false);
-    if (!faucetClicked &&
-        localProvider &&
-        localProvider._network &&
-        localProvider._network.chainId === 31337 &&
-        yourLocalBalance &&
-        formatEther(yourLocalBalance) <= 0
+  //
+  // 🧫 DEBUG 👨🏻‍🔬
+  //
+  useEffect(() => {
+    if (
+      DEBUG &&
+      mainnetProvider &&
+      address &&
+      selectedChainId &&
+      yourLocalBalance &&
+      yourMainnetBalance &&
+      readContracts &&
+      writeContracts
     ) {
-        faucetHint = ( <
-            div style = {
-                { padding: 16 }
-            } >
-            <
-            Button type = "primary"
-            onClick = {
-                () => {
-                    faucetTx({
-                        to: address,
-                        value: parseEther("0.01"),
-                    });
-                    setFaucetClicked(true);
-                }
-            } > 💰Grab funds from the faucet⛽️ <
-            /Button> < /
-            div >
-        );
+      console.log("_____________________________________ 🏗 scaffold-eth _____________________________________");
+      console.log("🌎 mainnetProvider", mainnetProvider);
+      console.log("🏠 localChainId", localChainId);
+      console.log("👩‍💼 selected address:", address);
+      console.log("🕵🏻‍♂️ selectedChainId:", selectedChainId);
+      console.log("💵 yourLocalBalance", yourLocalBalance ? formatEther(yourLocalBalance) : "...");
+      console.log("💵 yourMainnetBalance", yourMainnetBalance ? formatEther(yourMainnetBalance) : "...");
+      console.log("📝 readContracts", readContracts);
+      console.log("🔐 writeContracts", writeContracts);
     }
+  }, [
+    mainnetProvider,
+    address,
+    selectedChainId,
+    yourLocalBalance,
+    yourMainnetBalance,
+    readContracts,
+    writeContracts,
+  ]);
 
-    ////====================  ////====================  ////====================  ////====================  ////====================
+  let networkDisplay = "";
+  if (localChainId && selectedChainId && localChainId !== selectedChainId) {
+    const networkSelected = NETWORK(selectedChainId);
+    const networkLocal = NETWORK(localChainId);
+    if (selectedChainId === 1337 && localChainId === 31337) {
+      networkDisplay = (
+        <div style={{ zIndex: 2, position: "absolute", right: 0, top: 60, padding: 16 }}>
+          <Alert
+            message="⚠️ Wrong Network ID"
+            description={
+              <div>
+                You have <b>chain id 1337</b> for localhost and you need to change it to <b>31337</b> to work with
+                HardHat.
+                <div>(MetaMask -&gt; Settings -&gt; Networks -&gt; Chain ID -&gt; 31337)</div>
+              </div>
+            }
+            type="error"
+            closable={false}
+          />
+        </div>
+      );
+    } else {
+      networkDisplay = (
+        <div style={{ zIndex: 2, position: "absolute", right: 0, top: 60, padding: 16 }}>
+          <Alert
+            message="⚠️ Wrong Network"
+            description={
+              <div>
+                You have <b>{networkSelected && networkSelected.name}</b> selected and you need to be on{" "}
+                <b>{networkLocal && networkLocal.name}</b>.
+              </div>
+            }
+            type="error"
+            closable={false}
+          />
+        </div>
+      );
+    }
+  } else {
+    networkDisplay = (
+      <div style={{ zIndex: -1, position: "absolute", right: 154, top: 28, padding: 16, color: targetNetwork.color }}>
+        {targetNetwork.name}
+      </div>
+    );
+  }
 
+  const loadWeb3Modal = useCallback(async () => {
+    const provider = await web3Modal.connect();
+    setInjectedProvider(new Web3Provider(provider));
+  }, [setInjectedProvider]);
 
+  useEffect(() => {
+    if (web3Modal.cachedProvider) {
+      loadWeb3Modal();
+    }
+  }, [loadWeb3Modal]);
 
- 
+  const [route, setRoute] = useState();
+  useEffect(() => {
+    setRoute(window.location.pathname);
+  }, [setRoute]);
 
- 
-  const [yourJSON, setYourJSON] = useState(STARTING_JSON);
+  let faucetHint = "";
+  const faucetAvailable = localProvider && localProvider.connection && targetNetwork.name === "localhost";
+
+  const [faucetClicked, setFaucetClicked] = useState(false);
+  if (
+    !faucetClicked &&
+    localProvider &&
+    localProvider._network &&
+    localProvider._network.chainId === 31337 &&
+    yourLocalBalance &&
+    formatEther(yourLocalBalance) <= 0
+  ) {
+    faucetHint = (
+      <div style={{ padding: 16 }}>
+        <Button
+          type="primary"
+          onClick={() => {
+            faucetTx({
+              to: address,
+              value: parseEther("0.01"),
+            });
+            setFaucetClicked(true);
+          }}
+        >
+          💰 Grab funds from the faucet ⛽️
+        </Button>
+      </div>
+    );
+  }
+
   const [sending, setSending] = useState();
   const [ipfsHash, setIpfsHash] = useState();
   const [ipfsDownHash, setIpfsDownHash] = useState();
+
   const [downloading, setDownloading] = useState();
   const [ipfsContent, setIpfsContent] = useState();
+
   const [transferToAddresses, setTransferToAddresses] = useState({});
+
   const [loadedAssets, setLoadedAssets] = useState();
-
-
   /*useEffect(() => {
     const updateYourCollectibles = async () => {
       const assetUpdate = [];
@@ -339,255 +371,7 @@ function App(props) {
     if (readContracts && readContracts.DogeClubSVG) updateYourCollectibles();
   }, [assets, readContracts, transferEvents]);*/
 
-
-
-  ////====================  ////====================  ////====================  ////====================  ////====================
-
-
-
-    const [uploading, setUploading] = useState()
-    const [imageInIpfs, setImageInIpfs] = useState()
-
-    const uploadArea = ( <
-            Upload name = "image"
-            listType = "picture-card"
-            className = "avatar-uploader"
-            showUploadList = { false }
-            customRequest = {
-                async(a) => {
-                    console.log("CUSTOM REQUIEST", a)
-                    setUploading(true)
-                    const result = await ipfs.add(a.file);
-                    console.log("UPLOADED", result)
-                    setImageInIpfs(result.path)
-                    setUploading(false)
-                }
-            }
-            onChange = {
-                (a) => { console.log("CHANGE", a) }
-            } > {
-                imageInIpfs ? < img src = { "https://ipfs.io/ipfs/" + imageInIpfs }
-                style = {
-                    { maxWidth: 90, maxHeight: 90 }
-                }
-                /> : "image"} < /
-                Upload >
-            )
-
-            const imageUploadAndDisplay = uploading ? < Spin style = {
-                { margin: 32 }
-            }
-            /> : uploadArea
-
-            const [nftName, setNFTName] = useState();
-            const [nftDesc, setNFTDesc] = useState();
-            const [nftUrl, setNFTUrl] = useState();
-            const [animationUrl, setAnimationUrl] = useState();
-            const [youtubeUrl, setYoutubeUrl] = useState();
-
-            const textFormDisplay = ( <
-                div style = {
-                    { maxWidth: 320, margin: "auto", marginTop: 32, paddingBottom: 32 }
-                } >
-                <
-                Input placeholder = "name"
-                onChange = {
-                    (e) => { setNFTName(e.target.value) }
-                }
-                value = { nftName }
-                style = {
-                    { marginTop: 16 }
-                }
-                />
-
-                <
-                TextArea placeholder = "description"
-                rows = { 4 }
-                style = {
-                    { marginTop: 16 }
-                }
-                onChange = {
-                    (e) => { setNFTDesc(e.target.value) }
-                }
-                value = { nftDesc }
-                />
-
-                <
-                Input placeholder = "external url"
-                onChange = {
-                    (e) => { setNFTUrl(e.target.value) }
-                }
-                value = { nftUrl }
-                style = {
-                    { marginTop: 16 }
-                }
-                />
-
-                <
-                Input placeholder = "animation url"
-                onChange = {
-                    (e) => { setAnimationUrl(e.target.value) }
-                }
-                value = { animationUrl }
-                style = {
-                    { marginTop: 16 }
-                }
-                />
-
-                <
-                Input placeholder = "youtube url"
-                onChange = {
-                    (e) => { setYoutubeUrl(e.target.value) }
-                }
-                value = { youtubeUrl }
-                style = {
-                    { marginTop: 16 }
-                }
-                /> < /
-                div >
-            )
-
-            const [notation, setNotation] = useState()
-
-            const notationFormDisplay = ( <
-                div style = {
-                    { maxWidth: 520, margin: "auto", paddingBottom: 32 }
-                } >
-                <
-                TextArea placeholder = "notation"
-                rows = { 16 }
-                style = {
-                    { marginTop: 16 }
-                }
-                onChange = {
-                    (e) => { setNotation(e.target.value) }
-                }
-                value = { notation }
-                /> < /
-                div >
-            )
-
-            const [manifestInIPFS, setManifestInIPFS] = useState();
-
-
-            const uploadButton = ( <
-                div style = {
-                    { padding: 16 }
-                } >
-                <
-                Button style = {
-                    { margin: 8 }
-                }
-                loading = { sending }
-                size = "large"
-                shape = "round"
-                type = "primary"
-                disabled = {!notation || !nftName || !nftDesc || !imageInIpfs }
-                onClick = {
-                    async() => {
-                        console.log(notation, nftName, nftDesc, imageInIpfs)
-                        console.log("UPLOADING...", yourJSON);
-
-
-                        let manifest = {
-                            name: nftName,
-                            description: nftDesc,
-                            image: "https://ipfs.io/ipfs/" + imageInIpfs,
-                            notation: notation,
-                            /*
-
-                            skipping this for now, but eventually you could add:
-
-                            attributes: [
-                              {
-                                trait_type: "BackgroundColor",
-                                value: "green",
-                              },
-                              {
-                                trait_type: "Eyes",
-                                value: "googly",
-                              },
-                            ],*/
-                        }
-                        if (nftUrl) {
-                            manifest.external_url = nftUrl
-                        }
-                        if (animationUrl) {
-                            manifest.animation_url = animationUrl
-                        }
-                        if (youtubeUrl) {
-                            manifest.youtube_url = youtubeUrl
-                        }
-
-                        //console.log("manifest",manifest)
-
-                        setSending(true);
-                        setIpfsHash();
-                        const result = await ipfs.add(JSON.stringify(manifest)); // addToIPFS(JSON.stringify(yourJSON))
-                        setManifestInIPFS(result.path)
-                        setSending(false);
-                        console.log("RESULT:", result);
-                    }
-                } >
-                Upload Manifest <
-                /Button> < /
-                div >
-            )
-
-            const [minting, setMinting] = useState();
-
-            const [resultDisplay, setResultDisplay] = useState("");
-
-
-            const mintButton = ( <
-                Button style = {
-                    { margin: 8 }
-                }
-                loading = { minting }
-                size = "large"
-                shape = "round"
-                type = "primary"
-                disabled = {!notation || !manifestInIPFS }
-                onClick = {
-                    async() => {
-                        console.log("MINTING...", manifestInIPFS, notation);
-
-                        setMinting(true);
-
-                        const mintResult = await tx(writeContracts.DogeClubSVG.mintU(manifestInIPFS, notation))
-
-                        setMinting(false);
-
-                        console.log("mintResult", mintResult)
-                        setResultDisplay( <
-                            div style = {
-                                { marginTop: 32, paddingBottom: 256 }
-                            } >
-                            <
-                            Link onClick = {
-                                () => { setRoute("/yourcollectibles") }
-                            }
-                            to = "/yourcollectibles" > 🎉🍾🎊Success!!!🏷Click here to view the { nftName }
-                            NotationNFT!
-                            <
-                            /Link> < /
-                            div >
-                        )
-
-                    }
-                } >
-                Mint NFT <
-                /Button>
-            )
-
-            ////====================  ////====================  ////====================  ////====================  ////====================  ////====================  ////====================
-
-
-
-
-        ////////////////////////////////////////////////////////////////
-
-
+  const galleryList = [];
 
   return (
     <div className="App">
@@ -604,17 +388,7 @@ function App(props) {
               }}
               to="/"
             >
-              SVG NFT
-            </Link>
-          </Menu.Item>
-           <Menu.Item key="/upoba">
-            <Link
-              onClick={() => {
-                setRoute("/upoba");
-              }}
-              to="/upoba"
-            >
-              uPOBA
+              Your Loogies
             </Link>
           </Menu.Item>
           <Menu.Item key="/debug">
@@ -631,7 +405,12 @@ function App(props) {
 
         <Switch>
           <Route exact path="/">
-            {}
+            {/*
+                🎛 this scaffolding is full of commonly used components
+                this <Contract/> component will automatically parse your ABI
+                and give you a form to interact with it locally
+            */}
+
             <div style={{ maxWidth: 820, margin: "auto", marginTop: 32, paddingBottom: 32 }}>
               {isSigner?(
                 <Button type={"primary"} onClick={()=>{
@@ -661,7 +440,7 @@ function App(props) {
                           </div>
                         }
                       >
-                        <a href={"https://rinkeby.opensea.io/assets/"+(readContracts && readContracts.DogeClubSVG && readContracts.DogeClubSVG.address)+"/"+item.id} target="_blank">
+                        <a href={"https://opensea.io/assets/"+(readContracts && readContracts.DogeClubSVG && readContracts.DogeClubSVG.address)+"/"+item.id} target="_blank">
                         <img src={item.image} />
                         </a>
                         <div>{item.description}</div>
@@ -701,39 +480,11 @@ function App(props) {
             </div>
             <div style={{ maxWidth: 820, margin: "auto", marginTop: 32, paddingBottom: 256 }}>
 
+              🛠 built with <a href="https://dogeclub.io" target="_blank">DogeClubSVG</a>
+
+              🍴 <a href="https://github.com/fourswordsio/svg-nft/" target="_blank">DogeClubSVG</a>
+
             </div>
-          </Route>
-                    <Route exact path="/upoba">
-          <div style = {{ width: 600, margin: "auto", marginTop: 32, paddingBottom: 32 }} >
-          
-            { textFormDisplay }
-
-            { imageUploadAndDisplay }
-
-            {
-                imageInIpfs ? < div style = {
-                    { padding: 16 }
-                } > < Paragraph copyable > { imageInIpfs } < /Paragraph></div > : < div style = {
-                    { padding: 16 }
-                } > < /div>}
-
-                { notationFormDisplay }
-
-                { uploadButton }
-
-                {
-                    manifestInIPFS ? < div style = {
-                        { padding: 16 }
-                    } > < Paragraph copyable > { manifestInIPFS } < /Paragraph></div > : < div style = {
-                        { padding: 16 }
-                    } > < /div>}
-
-                    { mintButton }
-
-                    { resultDisplay }
-
- 
-            </div >
           </Route>
           <Route path="/debug">
 
@@ -784,12 +535,12 @@ function App(props) {
           <Col span={8} style={{ textAlign: "center", opacity: 1 }}>
             <Button
               onClick={() => {
-                window.open("https://fourswords.io/");
+                window.open("https://fourswords.io");
               }}
               size="large"
               shape="round"
             >
-              <span style={{ marginRight: 8 }} role="img" aria-label="support">
+              <span style={{ marginRight: 8 }} role="img" label="support">
                 💬
               </span>
               Support

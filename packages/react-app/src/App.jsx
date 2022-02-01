@@ -228,7 +228,7 @@ function App(props) {
       readContracts &&
       writeContracts
     ) {
-      console.log("_____________________________________ 🏗 scaffold-eth _____________________________________");
+      console.log("DogeClub SVG");
       console.log("🌎 mainnetProvider", mainnetProvider);
       console.log("🏠 localChainId", localChainId);
       console.log("👩‍💼 selected address:", address);
@@ -388,7 +388,7 @@ function App(props) {
               }}
               to="/"
             >
-              Your Loogies
+              My Sergey
             </Link>
           </Menu.Item>
           <Menu.Item key="/debug">
@@ -405,11 +405,7 @@ function App(props) {
 
         <Switch>
           <Route exact path="/">
-            {/*
-                🎛 this scaffolding is full of commonly used components
-                this <Contract/> component will automatically parse your ABI
-                and give you a form to interact with it locally
-            */}
+            {}
 
             <div style={{ maxWidth: 820, margin: "auto", marginTop: 32, paddingBottom: 32 }}>
               {isSigner?(
@@ -440,7 +436,7 @@ function App(props) {
                           </div>
                         }
                       >
-                        <a href={"https://opensea.io/assets/"+(readContracts && readContracts.DogeClubSVG && readContracts.DogeClubSVG.address)+"/"+item.id} target="_blank">
+                        <a href={"https://rinkeby.opensea.io/assets/"+(readContracts && readContracts.DogeClubSVG && readContracts.DogeClubSVG.address)+"/"+item.id} target="_blank">
                         <img src={item.image} />
                         </a>
                         <div>{item.description}</div>
